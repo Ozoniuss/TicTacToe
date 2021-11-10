@@ -3,6 +3,8 @@ import './App.css';
 import Square from './Square';
 import {useState} from 'react'
 import Board from './Board';
+import Undo from './UndoButton';
+import Redo from './RedoButton';
 
 function App() {
 
@@ -66,10 +68,18 @@ function App() {
 
   else if (!isDraw()){
     return (
-      <>
+      <div className="container">
         <h4>Current player is {currentPlayer}</h4>
         <Board values={values} squareChanged={changeSquareValue}></Board>
-      </>
+        <div className='row mt-3'>
+          <div className="col-7"></div>
+          <div className="col">
+            <Undo/>
+            <Redo/>
+          </div>
+        </div>
+        
+      </div>
     );
   }
 
