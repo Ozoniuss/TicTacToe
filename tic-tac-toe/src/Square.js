@@ -1,6 +1,6 @@
-import {useState} from "react"
+import { useState } from "react"
 
-export default function Square(props){
+export default function Square(props) {
 
     const [selected, setSelected] = useState(false);
 
@@ -9,30 +9,28 @@ export default function Square(props){
         setSelected(true);
     }
 
-    if (props.value===0){
-        return(
-            <div className="container" onClick={!selected ? squareClicked : null}>
+    if (props.value === 0) {
+        return (
+            <div className="box" onClick={!selected ? squareClicked : null}>
                 {props.value}
             </div>
         );
     }
 
-    else if (props.value===1){
-        return(
-            <div className="container" onClick={!selected ? squareClicked : null}>
+    else if (props.value === 1) {
+        return (
+            <div className="box" onClick={!selected ? squareClicked : null}>
                 {props.value}
             </div>
         );
     }
 
     else {
-        return(
-            <div className="container" onClick={!selected ? squareClicked : null}>
+        return (
+            <div className="box" onClick={!selected ? squareClicked : null}>
                 {props.value}
             </div>
         );
     }
-
-    return(<div/>)
 
 }
