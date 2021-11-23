@@ -3,7 +3,6 @@ import Square from "./Square"
 export default function Board(props) {
 
     const squareChanged = (location) => {
-        console.log("muie");
         props.squareChanged(location);
     }
 

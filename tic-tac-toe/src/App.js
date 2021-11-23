@@ -1,6 +1,4 @@
-import logo from './logo.svg';
 import './App.css';
-import Square from './Square';
 import { useState } from 'react'
 import Board from './Board';
 import Undo from './UndoButton';
@@ -18,71 +16,97 @@ function App() {
 
   const [hasWonPlayer, setHasWonPlayer] = useState(false);
   const [turn, setTurn] = useState(1);
-  const [undoList, setUndoList] = useState([]);
-  const [redoList, setRedoList] = useState([]);
+  const [undoLocations, setUndoLocations] = useState([]); // the order in which the locations were clicked
+  const [redoLocations, setRedoLocations] = useState([]);
+  const [wasSquaresClicked, setWasSquaresClicked] = useState([
+    false, false, false,
+    false, false, false,
+    false, false, false
+  ]); //0 if clicked and
 
   const incrementTurn = () => { setTurn(turn + 1) };
   const isDraw = () => { return turn === 10 && !hasWonPlayer };
 
   const undo = () => {
-    if (undoList.length !== 0) {
-      let OldUndoList = JSON.parse(JSON.stringify(undoList));
-      let OldRedoList = JSON.parse(JSON.stringify(redoList));
-      let oldValues = OldUndoList.pop(); // get the last list of values
+    if (undoLocations.length !== 0) {
+      let oldUndoLocations = undoLocations.slice();
+      let oldRedoLocations = redoLocations.slice();
+      let lastLocation = oldUndoLocations.pop(); //get the last square that was clicked
+      oldRedoLocations.push(lastLocation); //and add it to the redo list
 
-      OldRedoList.push(oldValues);
+      setUndoLocations(oldUndoLocations); // reset the undo list
+      setRedoLocations(oldRedoLocations); // reset the redo list
 
-      setUndoList(OldUndoList); // reset the undo list
-      setRedoList(OldRedoList); // add the values to the redo list
-      setValues(oldValues); // reset the values
+
+      let currentValues = values.slice(); // get the current values
+      currentValues[lastLocation] = 0; // set the location back to 0
+      setValues(currentValues);
+
+      let newWasClickedValues = wasSquaresClicked.slice();
+      newWasClickedValues[lastLocation] = false;
+      setWasSquaresClicked(newWasClickedValues);
+
       setTurn(turn - 1); // reset current turn
       setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // reset current player
     }
   }
 
   const redo = () => {
-    if (redoList.length !== 0) {
-      let OldUndoList = JSON.parse(JSON.stringify(undoList));
-      let OldRedoList = JSON.parse(JSON.stringify(redoList));
-      let oldValues = OldRedoList.pop(); // get the last list of values from the redo list
+    if (redoLocations.length !== 0) {
+      let oldUndoLocations = undoLocations.slice();
+      let oldRedoLocations = redoLocations.slice();
+      let lastLocation = oldRedoLocations.pop(); //get the last square that was clicked
+      oldUndoLocations.push(lastLocation); //and add it to the undo list
 
-      OldUndoList.push(oldValues);
+      setUndoLocations(oldUndoLocations); // reset the undo list
+      setRedoLocations(oldRedoLocations); // reset the redo list
 
-      setUndoList(OldUndoList); // reset the undo list
-      setRedoList(OldRedoList); // add the values to the redo list
-      setValues(oldValues); // reset the values
-      setTurn(turn + 1); // reset current turn
+      let currentValues = values.slice(); // get the current values
+      currentValues[lastLocation] = currentPlayer; // set the location back to 0
+      setValues(currentValues);
+
+      let newWasClickedValues = wasSquaresClicked.slice();
+      newWasClickedValues[lastLocation] = true;
+      setWasSquaresClicked(newWasClickedValues);
+
+      setTurn(turn - 1); // reset current turn
       setCurrentPlayer(currentPlayer === 1 ? 2 : 1); // reset current player
     }
   }
 
   //only chnage square value if a player has moved
   const changeSquareValue = (location) => {
-    console.log(location);
 
+    // if the square was already clicked we don't have to do anything
+    if (!wasSquaresClicked[location]) {
+      //add the current positions to the undo list
+      let oldUndoLocations = undoLocations.slice(); //copy the last order of locations
+      oldUndoLocations.push(location);
+      setUndoLocations(oldUndoLocations);
+      setRedoLocations([]); //clear redo list
 
-    //add the current positions to the undo list
-    let OldUndoList = JSON.parse(JSON.stringify(undoList));
-    OldUndoList.push(values.slice());
-    setUndoList(OldUndoList);
+      console.log(oldUndoLocations);
 
-    //clear the redo list
-    setRedoList([]);
+      //change list of values
+      let newValues = values.slice();
+      newValues[location] = currentPlayer
+      setValues(newValues);
 
-    console.log(OldUndoList);
+      //change wasClickedList
+      let newWasClickedValues = wasSquaresClicked.slice();
+      newWasClickedValues[location] = true;
+      setWasSquaresClicked(newWasClickedValues);
 
-    let newValues = values.slice();
-    newValues[location] = currentPlayer
-    setValues(newValues);
+      if (checkWinner(currentPlayer, newValues)) {
+        setHasWonPlayer(true);
+        setUndoLocations([]); // clear the undo list if players won
+        setRedoLocations([]);
+        return;
+      }
 
-    if (checkWinner(currentPlayer, newValues)) {
-      setHasWonPlayer(true);
-      setUndoList([]); // clear the undo list if players won
-      return;
+      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+      incrementTurn();
     }
-
-    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
-    incrementTurn();
 
   }
 
