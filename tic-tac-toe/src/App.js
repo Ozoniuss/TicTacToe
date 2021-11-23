@@ -82,15 +82,11 @@ function App() {
     // if the square was already clicked we don't have to do anything
     if (!wasSquaresClicked[location]) {
 
-
-      console.log(turn)
       //add the current positions to the undo list
       let oldUndoLocations = undoLocations.slice(); //copy the last order of locations
       oldUndoLocations.push(location);
       setUndoLocations(oldUndoLocations);
       setRedoLocations([]); //clear redo list
-
-      console.log(oldUndoLocations);
 
       //change list of values
       let newValues = values.slice();
@@ -162,7 +158,9 @@ function App() {
 
   return (
     <div className="container">
-      <h4>Current player is {currentPlayer}</h4>
+      <div className="center">
+        <h4>Current player: {currentPlayer}</h4>
+      </div>
       <Board values={values} squareChanged={!hasWonPlayer || isDraw ? changeSquareValue : () => { }}></Board>
       <div className='container'>
         <div className="center">
