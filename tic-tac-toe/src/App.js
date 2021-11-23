@@ -1,8 +1,9 @@
 import './App.css';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Board from './Board';
 import Undo from './UndoButton';
 import Redo from './RedoButton';
+import PlayAgainButton from './PlayAgainButton';
 
 function App() {
 
@@ -15,6 +16,7 @@ function App() {
     ]);
 
   const [hasWonPlayer, setHasWonPlayer] = useState(false);
+  const [isDraw, setIsDraw] = useState(false);
   const [turn, setTurn] = useState(1);
   const [undoLocations, setUndoLocations] = useState([]); // the order in which the locations were clicked
   const [redoLocations, setRedoLocations] = useState([]);
@@ -25,7 +27,7 @@ function App() {
   ]); //0 if clicked and
 
   const incrementTurn = () => { setTurn(turn + 1) };
-  const isDraw = () => { return turn === 10 && !hasWonPlayer };
+  const findIfDraw = () => { return turn === 9 && !hasWonPlayer };
 
   const undo = () => {
     if (undoLocations.length !== 0) {
@@ -79,6 +81,9 @@ function App() {
 
     // if the square was already clicked we don't have to do anything
     if (!wasSquaresClicked[location]) {
+
+
+      console.log(turn)
       //add the current positions to the undo list
       let oldUndoLocations = undoLocations.slice(); //copy the last order of locations
       oldUndoLocations.push(location);
@@ -100,7 +105,14 @@ function App() {
       if (checkWinner(currentPlayer, newValues)) {
         setHasWonPlayer(true);
         setUndoLocations([]); // clear the undo list if players won
-        setRedoLocations([]);
+        setRedoLocations([]); // clear the redo list as well
+        return;
+      }
+
+      if (findIfDraw()) {
+        setIsDraw(true);
+        setUndoLocations([]); // clear the undo list if players won
+        setRedoLocations([]); // clear the redo list as well
         return;
       }
 
@@ -127,20 +139,55 @@ function App() {
     return false;
   }
 
+  const playAgain = () => {
+    setCurrentPlayer(1);
+    setValues(
+      [
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, 0
+      ]);
+
+    setHasWonPlayer(false);
+    setIsDraw(false);
+    setTurn(1);
+    setUndoLocations([]); // the order in which the locations were clicked
+    setRedoLocations([]);
+    setWasSquaresClicked([
+      false, false, false,
+      false, false, false,
+      false, false, false
+    ]); //0 if clicked and
+  }
+
   return (
     <div className="container">
       <h4>Current player is {currentPlayer}</h4>
-      <Board values={values} squareChanged={changeSquareValue}></Board>
-      <div className='row mt-3'>
-        <div className="col-7"></div>
-        <div className="col">
+      <Board values={values} squareChanged={!hasWonPlayer || isDraw ? changeSquareValue : () => { }}></Board>
+      <div className='container'>
+        <div className="center">
           <Undo undo={undo} />
           <Redo redo={redo} />
         </div>
       </div>
+      <div className='container'>
+        <div className="center">
+          <PlayAgainButton playAgain={playAgain} />
+        </div>
+      </div>
 
-      {hasWonPlayer ? <div>Congratulations, you win!</div> : <></>}
-      {isDraw() ? <div>Draw!</div> : <></>}
+      {hasWonPlayer ?
+        <div className='container'>
+          <div className="center">
+            <h4>Congrats, player {currentPlayer} has won!</h4>
+          </div>
+        </div> : <></>}
+      {isDraw ?
+        <div className='container'>
+          <div className="center">
+            <h4>Unfortunately, it is a draw!</h4>
+          </div>
+        </div> : <></>}
     </div>
   );
 
