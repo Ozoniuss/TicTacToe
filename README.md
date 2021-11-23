@@ -1,2 +1,2 @@
 # TicTacToe
-This is a simple TicTacToe project written in React
+A very simple Tic-Tac-Toe application written in python.
